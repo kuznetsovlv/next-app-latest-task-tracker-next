@@ -8,8 +8,7 @@ interface TaskCreatorProps {
     onAdd(task: Task): void;
 }
 
-// eslint-disable-next-line react/display-name
-const TaskCreator = memo<TaskCreatorProps>(({onAdd}) => {
+const TaskCreator = memo<TaskCreatorProps>(function TaskCreator({onAdd})  {
     const [text, setText] = useState<string>('');
 
     return <div className={styles.creator}>

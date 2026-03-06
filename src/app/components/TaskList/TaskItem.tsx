@@ -7,10 +7,13 @@ interface TaskItemProps extends Task {
     onChange(task: Task): void;
 }
 
-// eslint-disable-next-line react/display-name
-const TaskItem = memo<TaskItemProps>(({id, text, completed, className, onChange}) =>  <li className={className}>
-        <input id={id} name={id}  type="checkbox" checked={completed} onClick={() => onChange({id, text, completed: !completed})} />
+const TaskItem = memo<TaskItemProps>(function TaskItem({id, text, completed, className, onChange}) {
+   return <li className={className}>
+        <input id={id} name={id} type="checkbox" checked={completed}
+               onClick={() => onChange({id, text, completed: !completed})}/>
         <label htmlFor={id}>{text}</label>
-    </li>);
+    </li>
+})
+
 
 export default TaskItem;
