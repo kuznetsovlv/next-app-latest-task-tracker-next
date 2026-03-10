@@ -15,7 +15,7 @@ interface TaskListProps {
 const TaskList: React.FC<TaskListProps> = ({tasks, onChange, onDelete}) => {
     return <ul className={styles.list}>
         {tasks.map(({id, ...restTask}) => {
-            const disabled = id === TEMPORARY_TASK_ID;
+            const disabled = id.startsWith(TEMPORARY_TASK_ID);
 
             return (<TaskItem key={id} id={id} className={clsx(styles.item, {[styles.tmp]: disabled})} disabled={disabled} {...restTask} onChange={onChange} onDelete={onDelete}/>)
         })}
