@@ -15,5 +15,10 @@ export const POST = async (request: Request): Promise<Response> => {
 
     const task = await addTask(text);
 
+    // return Response.json(
+    //     { error: 'Test error' },
+    //     { status: 400 }
+    // );
+
     return Response.json(task, { status: 201 });
 };
