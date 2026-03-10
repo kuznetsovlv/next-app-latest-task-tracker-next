@@ -1,3 +1,6 @@
+// export const dynamic = 'force-static';
+// export const revalidate = 5;
+
 import { Suspense } from 'react'
 import styles from './page.module.css';
 
@@ -15,4 +18,4 @@ export default function Home() {
       </main>
     </div>
   );
-}
+};
