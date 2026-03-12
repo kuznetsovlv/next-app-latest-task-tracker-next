@@ -8,15 +8,35 @@ $inputSize: 20px;
 
     .item {
         width: 100%;
+        padding: 0 10px;
         display: flex;
         justify-content: flex-start;
         align-items: center;
         gap: 1rem;
         flex-wrap: nowrap;
 
-        &.tmp {
+        &.optimistic {
             label {
                 color: #666666;
+            }
+
+            &.deleting {
+                position: relative;
+
+                &:after {
+                    display: block;
+                    position: absolute;
+                    content: '';
+                    top: calc(50% - 1px);
+                    bottom: calc(50% - 1px);
+                    left: 0;
+                    right: 0;
+                    background: #bbb5;
+                }
+
+                * {
+                    cursor: default;
+                }
             }
         }
 

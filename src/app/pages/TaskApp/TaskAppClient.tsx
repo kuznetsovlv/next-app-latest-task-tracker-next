@@ -1,27 +1,28 @@
 'use client';
 
-import {useCallback, useState, memo} from 'react';
-import type {Task} from '@/app/types';
+import {memo, useCallback, useState} from 'react';
+import {TaskClient, TaskStatus} from '@/app/types';
 import Stats from '@/app/components/Stats';
 import TaskCreator from '@/app/components/TaskCreator';
 import TaskList from '@/app/components/TaskList';
 import {TEMPORARY_TASK_ID} from '@/app/constants';
-import {createTaskAction} from '@/app/actions/tasks';
+import {createTaskAction, switchTask, removeTask} from '@/app/actions/tasks';
 
 interface TaskAppClientProps {
-    tasks: Task[];
+    tasks: TaskClient[];
 }
 
 export default memo<TaskAppClientProps>(function TaskAppClient({
     tasks: initialTasks,
 }) {
-    const [tasks, setTasks] = useState<Task[]>(initialTasks);
+    const [tasks, setTasks] = useState<TaskClient[]>(initialTasks);
 
     const handleAddTask = useCallback(async (text: string) => {
-        const optimisticTask: Task = {
+        const optimisticTask: TaskClient = {
             id: `${TEMPORARY_TASK_ID}-${crypto.randomUUID()}`,
             text,
             completed: false,
+            status: TaskStatus.OPTIMISTIC,
         };
 
         setTasks((tasks) => [...tasks, optimisticTask]);
@@ -31,7 +32,9 @@ export default memo<TaskAppClientProps>(function TaskAppClient({
 
             setTasks((tasks) =>
                 tasks.map((task) =>
-                    task.id === optimisticTask.id ? realTask : task
+                    task.id === optimisticTask.id
+                        ? {...realTask, status: TaskStatus.READY}
+                        : task
                 )
             );
         } catch (error) {
@@ -42,25 +45,72 @@ export default memo<TaskAppClientProps>(function TaskAppClient({
         }
     }, []);
 
-    const handleChangeTask = useCallback(
-        ({id, ...rest}: Task) =>
+    const handleToggleTask = useCallback(async (id: string) => {
+        setTasks((tasks) =>
+            tasks.map((task) =>
+                task.id === id
+                    ? {
+                          ...task,
+                          completed: !task.completed,
+                          status: TaskStatus.OPTIMISTIC,
+                      }
+                    : task
+            )
+        );
+
+        try {
+            const realTask = await switchTask(id);
+
             setTasks((tasks) =>
-                tasks.map((task) => (task.id === id ? {id, ...rest} : task))
-            ),
-        []
-    );
-    const handleDeleteTask = useCallback(
-        (id: string) =>
-            setTasks((tasks) => tasks.filter((task) => task.id !== id)),
-        []
-    );
+                tasks.map((task) =>
+                    task.id === id
+                        ? {...realTask, status: TaskStatus.READY}
+                        : task
+                )
+            );
+        } catch (error) {
+            setTasks((tasks) =>
+                tasks.map((task) =>
+                    task.id === id
+                        ? {
+                              ...task,
+                              completed: !task.completed,
+                              status: TaskStatus.READY,
+                          }
+                        : task
+                )
+            );
+            console.error(error);
+        }
+    }, []);
+
+    const handleDeleteTask = useCallback(async (id: string) => {
+        setTasks((tasks) =>
+            tasks.map((task) =>
+                task.id === id ? {...task, status: TaskStatus.DELETING} : task
+            )
+        );
+
+        try {
+            await removeTask(id);
+
+            setTasks((tasks) => tasks.filter((task) => task.id !== id));
+        } catch (error) {
+            setTasks((tasks) =>
+                tasks.map((task) =>
+                    task.id === id ? {...task, status: TaskStatus.READY} : task
+                )
+            );
+            console.error(error);
+        }
+    }, []);
 
     return (
         <>
             <TaskCreator onCreate={handleAddTask} />
             <TaskList
                 tasks={tasks}
-                onChange={handleChangeTask}
+                onChange={handleToggleTask}
                 onDelete={handleDeleteTask}
             />
             <Stats tasks={tasks} />

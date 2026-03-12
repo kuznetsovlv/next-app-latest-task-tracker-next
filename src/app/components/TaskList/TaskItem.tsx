@@ -1,12 +1,11 @@
 import {memo} from 'react';
 
 import type {Task} from '@/app/types';
-import {toggleTask, deleteTask} from '@/app/utils';
 
 interface TaskItemProps extends Task {
     className?: string;
     disabled?: boolean;
-    onChange(task: Task): void;
+    onChange(id: string): void;
     onDelete(id: string): void;
 }
 
@@ -27,16 +26,14 @@ const TaskItem = memo<TaskItemProps>(function TaskItem({
                 type="checkbox"
                 checked={completed}
                 disabled={disabled}
-                onChange={() => toggleTask(id).then(onChange, console.error)}
+                onChange={() => onChange(id)}
             />
             <label htmlFor={id}>{text}</label>
             <input
                 type="button"
                 value="-"
                 disabled={disabled}
-                onClick={() =>
-                    deleteTask(id).then(() => onDelete(id), console.error)
-                }
+                onClick={() => onDelete(id)}
             />
         </li>
     );
