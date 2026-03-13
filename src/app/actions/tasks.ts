@@ -18,7 +18,7 @@ export async function createTaskAction(text: string): Promise<Task> {
     return task;
 }
 
-export async function switchTask(id: string): Promise<Task> {
+export async function switchTaskAction(id: string): Promise<Task> {
     const task = await toggleTask(id);
 
     if (!task) {
@@ -30,7 +30,7 @@ export async function switchTask(id: string): Promise<Task> {
     return task;
 }
 
-export async function removeTask(id: string): Promise<boolean> {
+export async function removeTaskAction(id: string): Promise<boolean> {
     const success = await deleteTask(id);
 
     revalidatePath('/');
